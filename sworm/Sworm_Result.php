@@ -1,11 +1,17 @@
 <?php
+// +----------------------------------------------------------------------
+// | Sworm [Version: 1.0.0]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2017 http://dizy.club All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://opensource.org/licenses/MIT )
+// +----------------------------------------------------------------------
+// | Author: Dizy <derzart@gmail.com>
+// +----------------------------------------------------------------------
 
-/**
- * Created by PhpStorm.
- * User: Dizy
- * Date: 2017/8/8
- * Time: 22:28
- */
+//------------------------
+// Sworm Result
+//-------------------------
 class Sworm_Result extends Sworm_Abstract
 {
 
@@ -21,6 +27,10 @@ class Sworm_Result extends Sworm_Abstract
         $this->mConnection = $connection;
     }
 
+    /**
+     * Get Status
+     * @return bool
+     */
     public function getStatus(){
         if($this->mResult === false){
             return false;
@@ -29,6 +39,10 @@ class Sworm_Result extends Sworm_Abstract
         }
     }
 
+    /**
+     * Get Result
+     * @return mixed
+     */
     public function getResult(){
         if($this->mResult === false){
             return false;
@@ -37,6 +51,10 @@ class Sworm_Result extends Sworm_Abstract
         }
     }
 
+    /**
+     * Get ErrorCode
+     * @return int
+     */
     public function getErrorCode(){
         if($this->mResult === false){
             return $this->mConnection?$this->mLink->connect_errno:$this->mLink->errno;
@@ -45,6 +63,10 @@ class Sworm_Result extends Sworm_Abstract
         }
     }
 
+    /**
+     * Get ErrorMsg
+     * @return int|null
+     */
     public function getErrorMsg(){
         if($this->mResult === false){
             return $this->mConnection?$this->mLink->connect_error:(isset($this->mLink->error)?$this->mLink->error:null);

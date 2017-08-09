@@ -1,11 +1,17 @@
 <?php
+// +----------------------------------------------------------------------
+// | Sworm [Version: 1.0.0]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2017 http://dizy.club All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://opensource.org/licenses/MIT )
+// +----------------------------------------------------------------------
+// | Author: Dizy <derzart@gmail.com>
+// +----------------------------------------------------------------------
 
-/**
- * Created by PhpStorm.
- * User: Dizy
- * Date: 2017/8/8
- * Time: 16:16
- */
+//------------------------
+// Sworm Table
+//-------------------------
 class Sworm_Table extends Sworm_Abstract
 {
 
@@ -28,6 +34,13 @@ class Sworm_Table extends Sworm_Abstract
         $this->group = array();
     }
 
+
+    /**
+     * WHERE
+     * @param array|string $clause where clause
+     * @param array ...$side
+     * @return Sworm_Table
+     */
     public function where($clause, ...$side){
         $where = clone $this;
         if(is_array($clause)){
@@ -49,6 +62,12 @@ class Sworm_Table extends Sworm_Abstract
         return $where;
     }
 
+    /**
+     * WHERE OR
+     * @param array|string $clause or clause
+     * @param array ...$side
+     * @return Sworm_Table
+     */
     public function whereOr($clause, ...$side){
         $where = clone $this;
         if(is_array($clause)){
@@ -70,6 +89,11 @@ class Sworm_Table extends Sworm_Abstract
         return $where;
     }
 
+    /**
+     * SELECT
+     * @param array|string $fields fields to select
+     * @return Sworm_Table
+     */
     public function select($fields){
         $select = clone $this;
         if(!is_array($fields))
@@ -78,6 +102,11 @@ class Sworm_Table extends Sworm_Abstract
         return $select;
     }
 
+    /**
+     * ORDER
+     * @param string|array $fields rules for sorting
+     * @return Sworm_Table
+     */
     public function order($fields){
         $order = clone $this;
         if(!is_array($fields))
@@ -86,6 +115,12 @@ class Sworm_Table extends Sworm_Abstract
         return $order;
     }
 
+    /**
+     * LIMIT
+     * @param int $num number
+     * @param int $offset offset
+     * @return Sworm_Table
+     */
     public function limit($num, $offset=0){
         $limit = clone $this;
         $limit->limit = array(
@@ -95,6 +130,12 @@ class Sworm_Table extends Sworm_Abstract
         return $limit;
     }
 
+    /**
+     * GROUP BY
+     * @param string $by by field
+     * @param null $having having clause
+     * @return Sworm_Table
+     */
     public function group($by, $having = null){
         $group = clone $this;
         $group->group = array(
@@ -104,18 +145,11 @@ class Sworm_Table extends Sworm_Abstract
         return $group;
     }
 
-    private function genSelect(){
-        if(sizeof($this->select)==0){
-            return "SELECT * ";
-        }
-        $selects = "";
-        foreach ($this->select as $item){
-            $selects.=trim($item).", ";
-        }
-        $selects = substr($selects, 0, -2);
-        return "SELECT ".$selects." ";
-    }
 
+    /**
+     * Get Table's Name
+     * @return string
+     */
     public function getTable(){
         $prefix = "";
         if(isset($this->options['prefix'])){
@@ -124,6 +158,10 @@ class Sworm_Table extends Sworm_Abstract
         return $prefix.$this->table;
     }
 
+    /**
+     * Fetch All SELECT Results
+     * @param callable $callback callback function
+     */
     public function fetch($callback){
         $query = $this->genSelect().$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
         if(isset($this->options['debug']) && $this->options['debug']==true){
@@ -134,12 +172,17 @@ class Sworm_Table extends Sworm_Abstract
         });
     }
 
-    public function count($colum_name, $callback = ""){
+    /**
+     * COUNT
+     * @param string $column_name column to count
+     * @param string $callback callback function
+     */
+    public function count($column_name, $callback = ""){
         if($callback == ""){
-            $callback = $colum_name;
+            $callback = $column_name;
             $colum_name = "*";
         }
-        $query = "SELECT COUNT($colum_name) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = "SELECT COUNT($column_name) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
         if(isset($this->options['debug']) && $this->options['debug']==true){
             echo $query."\n";
         }
@@ -148,8 +191,13 @@ class Sworm_Table extends Sworm_Abstract
         });
     }
 
-    public function sum($colum_name, $callback){
-        $query = "SELECT SUM($colum_name) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+    /**
+     * SUM
+     * @param string $column_name column to sum
+     * @param callable $callback callback function
+     */
+    public function sum($column_name, $callback){
+        $query = "SELECT SUM($column_name) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
         if(isset($this->options['debug']) && $this->options['debug']==true){
             echo $query."\n";
         }
@@ -164,15 +212,20 @@ class Sworm_Table extends Sworm_Abstract
                 if(is_null($val)){
                     $result = 0;
                 }else{
-                    $result = intval($val);
+                    $result = $val;
                 }
                 $callback(new Sworm_Result($this->mSworm, $link, $result));
             }
         });
     }
 
-    public function max($colum_name, $callback){
-        $query = "SELECT MAX($colum_name) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+    /**
+     * MAX
+     * @param string $column_name column to get max in
+     * @param callable $callback callback function
+     */
+    public function max($column_name, $callback){
+        $query = "SELECT MAX($column_name) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
         if(isset($this->options['debug']) && $this->options['debug']==true){
             echo $query."\n";
         }
@@ -187,13 +240,18 @@ class Sworm_Table extends Sworm_Abstract
                 if(is_null($val)){
                     $result = false;
                 }else{
-                    $result = intval($val);
+                    $result = $val;
                 }
                 $callback(new Sworm_Result($this->mSworm, $link, $result));
             }
         });
     }
 
+    /**
+     * MIN
+     * @param string $colum_name column to get min in
+     * @param callable $callback callback function
+     */
     public function min($colum_name, $callback){
         $query = "SELECT MIN($colum_name) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
         if(isset($this->options['debug']) && $this->options['debug']==true){
@@ -209,12 +267,20 @@ class Sworm_Table extends Sworm_Abstract
                 }
                 if(is_null($val)){
                     $result = false;
+                }else{
+                    $result = $val;
                 }
                 $callback(new Sworm_Result($this->mSworm, $link, $result));
             }
         });
     }
 
+    /**
+     * GetBy...
+     * @param string $column_name by column
+     * @param mixed $value value to search for
+     * @param callable $callback callback function
+     */
     public function getBy($column_name, $value, $callback){
         $query = "SELECT * ".$this->genTable()."WHERE $column_name = '".addslashes($value)."'";
         if(isset($this->options['debug']) && $this->options['debug']==true){
@@ -225,6 +291,11 @@ class Sworm_Table extends Sworm_Abstract
         });
     }
 
+    /**
+     * Get
+     * @param int $id Value of Primary Key
+     * @param callable $callback callback function
+     */
     public function get($id, $callback){
         if(is_array($id)){
             $get = clone $this;
@@ -252,6 +323,11 @@ class Sworm_Table extends Sworm_Abstract
         }
     }
 
+    /**
+     * UPDATE
+     * @param array $data data for update
+     * @param callable $callback callback function
+     */
     public function update($data, $callback){
         $sets = "";
         $keys = array_keys($data);
@@ -276,6 +352,11 @@ class Sworm_Table extends Sworm_Abstract
         });
     }
 
+    /**
+     * INSERT
+     * @param array $data data to insert
+     * @param callable $callback callback function
+     */
     public function insert($data, $callback){
         $fields = ""; $values = "";
         $keys = array_keys($data);
@@ -299,6 +380,10 @@ class Sworm_Table extends Sworm_Abstract
         });
     }
 
+    /**
+     * DELETE
+     * @param callable $callback callback function
+     */
     public function delete($callback){
         $query = "DELETE ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
         if(isset($this->options['debug']) && $this->options['debug']==true){
@@ -310,6 +395,18 @@ class Sworm_Table extends Sworm_Abstract
             }
             $callback(new Sworm_Result($this->mSworm, $link, $result));
         });
+    }
+
+    private function genSelect(){
+        if(sizeof($this->select)==0){
+            return "SELECT * ";
+        }
+        $selects = "";
+        foreach ($this->select as $item){
+            $selects.=trim($item).", ";
+        }
+        $selects = substr($selects, 0, -2);
+        return "SELECT ".$selects." ";
     }
 
     private function genTable(){

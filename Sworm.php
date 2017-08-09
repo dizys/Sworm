@@ -1,4 +1,13 @@
 <?php
+// +----------------------------------------------------------------------
+// | Sworm [Version: 1.0.0]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2017 http://dizy.club All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://opensource.org/licenses/MIT )
+// +----------------------------------------------------------------------
+// | Author: Dizy <derzart@gmail.com>
+// +----------------------------------------------------------------------
 include_once dirname(__FILE__) . "/sworm/Sworm_Abstract.php";
 include_once dirname(__FILE__) . "/sworm/Sworm_Table.php";
 include_once dirname(__FILE__) . "/sworm/Sworm_Result.php";
@@ -8,12 +17,9 @@ include_once dirname(__FILE__) . "/sworm/exp/Sworm_NotIn.php";
 include_once dirname(__FILE__) . "/sworm/exp/Sworm_Like.php";
 include_once dirname(__FILE__) . "/sworm/exp/Sworm_NotLike.php";
 include_once dirname(__FILE__) . "/sworm/exp/Sworm_RegExp.php";
-/**
- * Created by PhpStorm.
- * User: Dizy
- * Date: 2017/8/8
- * Time: 15:32
- */
+//------------------------
+// Sworm
+//-------------------------
 class Sworm extends Sworm_Abstract
 {
     public function __construct()
@@ -21,6 +27,11 @@ class Sworm extends Sworm_Abstract
         $this->connection = new swoole_mysql();
     }
 
+    /**
+     * Connect
+     * @param array $server database config
+     * @param callable $callback callback function
+     */
     public function connect($server, $callback){
         $this->options = $server;
         $this->connection->connect($server, function(swoole_mysql $db, $result) use ($callback) {
@@ -28,6 +39,9 @@ class Sworm extends Sworm_Abstract
         });
     }
 
+    /**
+     *  Disconnect
+     */
     public function disconnect(){
         $this->connection->close();
     }
@@ -37,10 +51,20 @@ class Sworm extends Sworm_Abstract
         return new Sworm_Table($this, $name);
     }
 
+    /**
+     * Get Table Object
+     * @param string $name Table's Name
+     * @return Sworm_Table
+     */
     public function table($name){
         return new Sworm_Table($this, $name);
     }
 
+    /**
+     * Run Query and Get Result
+     * @param string $sql sql sentence
+     * @param callable $callback callback function
+     */
     public function query($sql, $callback){
         $this->connection->query($sql, function(swoole_mysql $link, $result) use ($callback){
             if($result === true){
@@ -50,17 +74,30 @@ class Sworm extends Sworm_Abstract
         });
     }
 
+    /**
+     * Begin a Transaction
+     * @param callable $callback callback function
+     */
     public function begin($callback){
         $this->connection->begin(function(swoole_mysql $link, $result) use ($callback){
             $callback(new Sworm_Result($this, $link, $result));
         });
     }
 
+    /**
+     * Commit the Transaction
+     * @param callable $callback callback function
+     */
     public function commit($callback){
         $this->connection->commit(function(swoole_mysql $link, $result) use ($callback){
             $callback(new Sworm_Result($this, $link, $result));
         });
     }
+
+    /**
+     * Rollback the Transaction
+     * @param callable $callback callback function
+     */
     public function rollback($callback){
         $this->connection->rollback(function(swoole_mysql $link, $result) use ($callback){
             $callback(new Sworm_Result($this, $link, $result));
