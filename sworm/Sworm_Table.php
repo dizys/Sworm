@@ -124,71 +124,6 @@ class Sworm_Table extends Sworm_Abstract
         return $prefix.$this->table;
     }
 
-    private function genTable(){
-
-        return "FROM ".$this->getTable()." ";
-    }
-
-    private function genWhere(){
-        if(sizeof($this->where)==0){
-            return "";
-        }
-        $wheres = "";
-        foreach ($this->where as $item){
-            $addon = $item['type']." ";
-            if($wheres==""){
-                $addon = "";
-            }
-            if(is_array($item['side'])){
-                $wheres.=$addon.$item['clause']." ";
-                foreach ($item['side'] as $sideitem){
-                    $wheres = str_replace_once("?", "'".addslashes($sideitem)."'", $wheres);
-                }
-            }else{
-                if(gettype($item['side'])!="object"){
-                    $wheres.=$addon.$item['clause']." = '".addslashes($item['side'])."' ";
-                }else{
-                    $wheres.=$addon.$item['clause'].($item['side']->_get())." ";
-                }
-            }
-        }
-        return "WHERE ".$wheres;
-    }
-
-    private function genGroup(){
-        if(sizeof($this->group)==0){
-            return "";
-        }
-        $addon = "";
-        if(!is_null($this->group['having'])){
-            $addon = " HAVING ".$this->group['having'];
-        }
-        return "GROUP BY ".$this->group['by'].$addon." ";
-    }
-
-    private function genOrder(){
-        if(sizeof($this->order)==0){
-            return "";
-        }
-        $orders = "";
-        foreach ($this->order as $item){
-            $orders.=trim($item).", ";
-        }
-        $orders = substr($orders, 0, -2);
-        return "ORDER BY ".$orders." ";
-    }
-
-    private function genLimit(){
-        if(sizeof($this->limit)==0){
-            return "";
-        }
-        if($this->limit['offset']==0){
-            return "LIMIT ".$this->limit['num']." ";
-        }else{
-            return "LIMIT ".$this->limit['offset'].",".$this->limit['num']." ";
-        }
-    }
-
     public function fetch($callback){
         $query = $this->genSelect().$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
         if(isset($this->options['debug']) && $this->options['debug']==true){
@@ -290,14 +225,31 @@ class Sworm_Table extends Sworm_Abstract
         });
     }
 
-    public function get($column_name, $callback){
-        $query = "SELECT $column_name ".$this->genTable();
-        if(isset($this->options['debug']) && $this->options['debug']==true){
-            echo $query."\n";
+    public function get($id, $callback){
+        if(is_array($id)){
+            $get = clone $this;
+            $get->where($id)->fetch($callback);
+        }else{
+            $query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".$this->options['database']."' AND TABLE_NAME = '".$this->getTable()."' AND COLUMN_KEY = 'PRI'";
+            if(isset($this->options['debug']) && $this->options['debug']==true){
+                echo $query."\n";
+            }
+            $this->connection->query($query, function(swoole_mysql $link, $result) use ($callback, $id){
+                $result = new Sworm_Result($this->mSworm, $link, $result);
+                if($result->status && isset($result->result[0]['COLUMN_NAME'])){
+                    $key = $result->result[0]['COLUMN_NAME'];
+                    $query = "SELECT * ".$this->genTable()."WHERE $key='$id'";
+                    if(isset($this->options['debug']) && $this->options['debug']==true){
+                        echo $query."\n";
+                    }
+                    $this->connection->query($query, function(swoole_mysql $link, $result) use ($callback){
+                        $callback(new Sworm_Result($this->mSworm, $link, $result));
+                    });
+                }else{
+                    $callback($result);
+                }
+            });
         }
-        $this->connection->query($query, function(swoole_mysql $link, $result) use ($callback){
-            $callback(new Sworm_Result($this->mSworm, $link, $result));
-        });
     }
 
     public function update($data, $callback){
@@ -360,6 +312,71 @@ class Sworm_Table extends Sworm_Abstract
         });
     }
 
+    private function genTable(){
+
+        return "FROM ".$this->getTable()." ";
+    }
+
+    private function genWhere(){
+        if(sizeof($this->where)==0){
+            return "";
+        }
+        $wheres = "";
+        foreach ($this->where as $item){
+            $addon = $item['type']." ";
+            if($wheres==""){
+                $addon = "";
+            }
+            if(is_array($item['side'])){
+                $wheres.=$addon.$item['clause']." ";
+                foreach ($item['side'] as $sideitem){
+                    $wheres = str_replace_once("?", "'".addslashes($sideitem)."'", $wheres);
+                }
+            }else{
+                if(gettype($item['side'])!="object"){
+                    $wheres.=$addon.$item['clause']." = '".addslashes($item['side'])."' ";
+                }else{
+                    $wheres.=$addon.$item['clause'].($item['side']->_get())." ";
+                }
+            }
+        }
+        return "WHERE ".$wheres;
+    }
+
+    private function genGroup(){
+        if(sizeof($this->group)==0){
+            return "";
+        }
+        $addon = "";
+        if(!is_null($this->group['having'])){
+            $addon = " HAVING ".$this->group['having'];
+        }
+        return "GROUP BY ".$this->group['by'].$addon." ";
+    }
+
+    private function genOrder(){
+        if(sizeof($this->order)==0){
+            return "";
+        }
+        $orders = "";
+        foreach ($this->order as $item){
+            $orders.=trim($item).", ";
+        }
+        $orders = substr($orders, 0, -2);
+        return "ORDER BY ".$orders." ";
+    }
+
+    private function genLimit(){
+        if(sizeof($this->limit)==0){
+            return "";
+        }
+        if($this->limit['offset']==0){
+            return "LIMIT ".$this->limit['num']." ";
+        }else{
+            return "LIMIT ".$this->limit['offset'].",".$this->limit['num']." ";
+        }
+    }
+
     function __call($name, $arguments)
     {
         if(strpos($name, "getBy")==0 && sizeof($arguments)==2){
@@ -376,7 +393,6 @@ class Sworm_Table extends Sworm_Abstract
             $this->getBy($column, $arguments[0], $arguments[1]);
         }
     }
-
 }
 
 function str_replace_once($needle, $replace, $haystack) {
