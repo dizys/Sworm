@@ -1,10 +1,10 @@
-# Sworm - 基于Swoole的异步MySQL数据库ORM框架
+# Sworm - 基于Swoole的异步MySQL数据库查询构造器
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/github/issues/heikezy/Sworm.svg)](https://github.com/heikezy/Sworm/issues)
 [![GitHub stars](https://img.shields.io/github/stars/heikezy/Sworm.svg)](https://github.com/heikezy/Sworm)
 [![GitHub forks](https://img.shields.io/github/forks/heikezy/Sworm.svg)](https://github.com/heikezy/Sworm)
 
-Sworm是一个基于Swoole的异步MySQL调用的ORM数据库框架。该框架封装了swoole_mysql，API与NotORM很相似。使用Sworm能更加轻松地生成查询语句，使代码结构更加清晰，返回更加规范。
+Sworm是一个基于Swoole的异步MySQL调用的数据库查询构造器。该框架封装了swoole_mysql，API与NotORM很相似。使用Sworm能更加轻松地生成查询语句，使代码结构更加清晰，返回更加规范。
 任何问题 QQ: 529189858 或者 mailto: derzart@gmail.com
 ## 环境要求
 Sworm的至少工作在以下环境:
