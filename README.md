@@ -5,7 +5,6 @@
 [![GitHub forks](https://img.shields.io/github/forks/heikezy/Sworm.svg)](https://github.com/heikezy/Sworm)
 
 Sworm是一个基于Swoole的异步MySQL调用的数据库查询构造器。该框架封装了swoole_mysql，API与NotORM很相似。使用Sworm能更加轻松地生成查询语句，使代码结构更加清晰，返回更加规范。
-任何问题 QQ: 529189858 或者 mailto: derzart@gmail.com
 ## 环境要求
 Sworm的至少工作在以下环境:
 
